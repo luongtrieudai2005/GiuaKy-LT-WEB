@@ -1,9 +1,5 @@
 name: CI/CD Pipeline
 
-# ============================================================
-# Trigger: pipeline chạy mỗi khi có push lên branch main
-# Các branch khác (feature/*, dev) không trigger pipeline này
-# ============================================================
 on:
   push:
     branches:
@@ -13,8 +9,6 @@ jobs:
 
   # ============================================================
   # Job 1: Test
-  # Chạy unit tests trước khi deploy
-  # Nếu job này fail → pipeline dừng, không deploy code lỗi
   # ============================================================
   test:
     name: Run tests
@@ -31,94 +25,63 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./backend
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx
+        run: pip install -r requirements.txt
 
       - name: Run tests
         working-directory: ./backend
         env:
-          # Dùng biến môi trường giả cho môi trường test
-          # Không cần kết nối MongoDB thật khi chạy unit test
           MONGODB_URL: mongodb://localhost:27017/
           MONGODB_DB_NAME: testdb
           SECRET_KEY: test_secret_key_for_ci
           ACCESS_TOKEN_EXPIRE_MINUTES: "60"
         run: |
+          pip install pytest pytest-asyncio httpx
           pytest tests/ -v --tb=short || echo "No tests found, skipping"
 
   # ============================================================
-  # Job 2: Build & Push Docker image
-  # Chạy sau khi test pass
-  # Build image và push lên GitHub Container Registry (GHCR)
+  # Job 2: Build — verify Docker image builds successfully
+  # Không push lên registry, chỉ build để xác nhận không lỗi
   # ============================================================
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
-    needs: test   # chỉ chạy nếu job "test" thành công
+    needs: test
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          # GITHUB_TOKEN là secret tự động có sẵn, không cần tạo thủ công
+      - name: Build FastAPI Docker image
+        run: |
+          docker build \
+            --tag taskmanager-fastapi:${{ github.sha }} \
+            --file backend/Dockerfile \
+            ./backend
+          echo "Image built successfully: taskmanager-fastapi:${{ github.sha }}"
 
-      - name: Build and push FastAPI image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          # Image được tag theo tên repo và SHA của commit
-          # Ví dụ: ghcr.io/username/taskmanager:abc1234
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/taskmanager:latest
-            ghcr.io/${{ github.repository_owner }}/taskmanager:${{ github.sha }}
+      - name: Verify image exists
+        run: docker image inspect taskmanager-fastapi:${{ github.sha }}
 
   # ============================================================
-  # Job 3: Deploy lên VPS
-  # Chạy sau khi build thành công
-  # SSH vào server, pull code mới, restart containers
-  #
-  # Secrets cần cấu hình trong GitHub repository settings:
-  #   VPS_HOST     → IP hoặc domain của server
-  #   VPS_USER     → username SSH (thường là "ubuntu" hoặc "root")
-  #   VPS_SSH_KEY  → private SSH key (nội dung file ~/.ssh/id_rsa)
+  # Job 3: Deploy — chỉ chạy khi có VPS thật
+  # Hiện tại bỏ comment để tránh fail khi chưa có secrets
+  # Khi có VPS: uncomment và thêm secrets vào GitHub settings
   # ============================================================
-  deploy:
-    name: Deploy to VPS
-    runs-on: ubuntu-latest
-    needs: build   # chỉ chạy nếu job "build" thành công
 
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host:     ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key:      ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            # Di chuyển vào thư mục project trên server
-            cd ~/taskmanager
-
-            # Pull code mới nhất từ main branch
-            git pull origin main
-
-            # Pull image mới từ GHCR (nếu dùng pre-built image)
-            # docker pull ghcr.io/${{ github.repository_owner }}/taskmanager:latest
-
-            # Rebuild và restart tất cả containers
-            # --build  : rebuild image từ Dockerfile
-            # -d       : chạy ở background (detached mode)
-            # --remove-orphans : xóa containers không còn trong compose file
-            docker compose up --build -d --remove-orphans
-
-            # Xóa các image cũ không dùng nữa để giải phóng disk
-            docker image prune -f
-
-            echo "Deploy completed at $(date)"
+  # deploy:
+  #   name: Deploy to VPS
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host:     ${{ secrets.VPS_HOST }}
+  #         username: ${{ secrets.VPS_USER }}
+  #         key:      ${{ secrets.VPS_SSH_KEY }}
+  #         script: |
+  #           cd ~/taskmanager
+  #           git pull origin main
+  #           docker compose up --build -d --remove-orphans
+  #           docker image prune -f
+  #           echo "Deploy completed at $(date)"
