@@ -1,0 +1,26 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# MongoDB - phải ghim cả 3 version này cùng nhau
+# motor 3.4.0 chỉ tương thích với pymongo 4.6.x
+# pymongo 4.7+ đổi internal API làm motor 3.4.0 bị lỗi import
+motor==3.4.0
+pymongo==4.6.3
+beanie==1.26.0
+
+# Data validation
+pydantic[email]==2.7.1
+
+# JWT authentication
+python-jose[cryptography]==3.3.0
+
+# bcrypt - passlib 1.7.4 không tương thích với bcrypt >= 4.1.0
+passlib==1.7.4
+bcrypt==4.0.1
+
+# Form parsing
+python-multipart==0.0.9
+
+# Load .env file
+python-dotenv==1.0.1
