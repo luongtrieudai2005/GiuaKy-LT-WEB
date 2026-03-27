@@ -1,0 +1,21 @@
+# Environment variables — chứa mật khẩu, không commit
+.env
+backend/.env
+
+# SSL certificates — private key không được public
+nginx/ssl/
+
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/**/*.pyc
+*.egg-info/
+
+# Docker
+docker-compose.prod.yml
+
+# OS
+.DS_Store
+Thumbs.db

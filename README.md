@@ -294,13 +294,6 @@ docker compose down -v
 
 ---
 
-## Thành viên nhóm
-
-| Họ và tên | MSSV | Vai trò |
-|---|---|---|
-| [Thành viên 1] | [MSSV] | [Vai trò] |
-| [Thành viên 2] | [MSSV] | [Vai trò] |
-
 **Môn học:** Lập trình Web và Ứng dụng (503073)
 **Trường:** Đại học Tôn Đức Thắng — Khoa Công nghệ Thông tin
 **Học kỳ:** 2 — Năm học 2025–2026
