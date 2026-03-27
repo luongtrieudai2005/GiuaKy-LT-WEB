@@ -1,106 +1,106 @@
-# TaskFlow — Task Manager Web Application
+# TaskFlow — Ứng dụng Quản lý Công việc
 
-A production-ready task management web application built to demonstrate **web application deployment** techniques including Docker, Nginx reverse proxy, HTTPS/SSL, and CI/CD with GitHub Actions.
+Ứng dụng web quản lý công việc (Task Manager) được xây dựng nhằm minh họa các kỹ thuật **triển khai ứng dụng web** bao gồm Docker, Nginx reverse proxy, HTTPS/SSL và CI/CD với GitHub Actions.
 
 ---
 
-## Tech Stack
+## Công nghệ sử dụng
 
-| Layer | Technology |
+| Tầng | Công nghệ |
 |---|---|
 | Backend | Python 3.11, FastAPI, Uvicorn |
-| Database | MongoDB 7.0 (via Beanie ODM + Motor) |
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Cơ sở dữ liệu | MongoDB 7.0 (Beanie ODM + Motor) |
+| Frontend | HTML5, CSS3, JavaScript thuần |
 | Reverse Proxy | Nginx 1.25 |
 | Containerization | Docker, Docker Compose |
 | CI/CD | GitHub Actions |
-| Authentication | JWT (JSON Web Token) via python-jose |
+| Xác thực | JWT (JSON Web Token) |
 
 ---
 
-## Project Structure
+## Cấu trúc thư mục
 
 ```
 task-manager/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # GitHub Actions CI/CD pipeline
+│       └── deploy.yml          # Pipeline CI/CD GitHub Actions
 ├── backend/
 │   ├── routers/
-│   │   ├── users.py            # Auth endpoints (register, login)
-│   │   ├── tasks.py            # Task CRUD endpoints
-│   │   └── categories.py       # Category CRUD endpoints
-│   ├── main.py                 # FastAPI app entry point
-│   ├── models.py               # MongoDB document models (Beanie)
-│   ├── schemas.py              # Pydantic request/response schemas
-│   ├── database.py             # JWT helpers, password hashing
-│   ├── requirements.txt        # Python dependencies
-│   └── Dockerfile              # Backend container image
+│   │   ├── users.py            # Endpoint xác thực (đăng ký, đăng nhập)
+│   │   ├── tasks.py            # Endpoint CRUD công việc
+│   │   └── categories.py       # Endpoint CRUD danh mục
+│   ├── main.py                 # Điểm khởi động ứng dụng FastAPI
+│   ├── models.py               # Mô hình document MongoDB (Beanie)
+│   ├── schemas.py              # Schema Pydantic cho request/response
+│   ├── database.py             # Hàm hỗ trợ JWT và mã hóa mật khẩu
+│   ├── requirements.txt        # Danh sách thư viện Python
+│   └── Dockerfile              # Image Docker cho backend
 ├── frontend/
-│   ├── index.html              # Single-page application
-│   ├── style.css               # Dark minimal UI styles
-│   └── app.js                  # Fetch API calls to backend
+│   ├── index.html              # Giao diện ứng dụng (SPA)
+│   ├── style.css               # Stylesheet giao diện tối
+│   └── app.js                  # Logic giao tiếp với API
 ├── nginx/
-│   ├── nginx.conf              # Reverse proxy + SSL config
-│   └── ssl/                    # SSL certificates (not committed)
+│   ├── nginx.conf              # Cấu hình reverse proxy và SSL
+│   └── ssl/                    # Chứng chỉ SSL (không commit lên git)
 │       ├── cert.pem
 │       └── key.pem
-├── docker-compose.yml          # Orchestrates all services
-├── generate-ssl.bat            # Generate self-signed cert (Windows)
-├── generate-ssl.sh             # Generate self-signed cert (Linux/Mac)
-├── .env.example                # Environment variables template
+├── docker-compose.yml          # Điều phối tất cả các service
+├── generate-ssl.bat            # Tạo chứng chỉ SSL tự ký (Windows)
+├── generate-ssl.sh             # Tạo chứng chỉ SSL tự ký (Linux/Mac)
+├── .env.example                # Mẫu biến môi trường
 └── README.md
 ```
 
 ---
 
-## Prerequisites
+## Yêu cầu hệ thống
 
-Make sure the following are installed on your machine:
+Cài đặt các phần mềm sau trước khi chạy dự án:
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose)
-- [OpenSSL](https://slproweb.com/products/Win32OpenSSL.html) — for generating SSL certificates
-  - Windows users with Git Bash already have OpenSSL available
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (đã bao gồm Docker Compose)
+- [OpenSSL](https://slproweb.com/products/Win32OpenSSL.html) — để tạo chứng chỉ SSL
+  - Người dùng Windows có Git Bash đã có sẵn OpenSSL
 
 ---
 
-## Setup & Running (Local with Docker)
+## Hướng dẫn chạy với Docker (Khuyến nghị)
 
-### Step 1 — Clone the repository
+### Bước 1 — Clone repository
 
 ```bash
 git clone https://github.com/your-username/taskmanager.git
 cd taskmanager
 ```
 
-### Step 2 — Create environment file
+### Bước 2 — Tạo file cấu hình môi trường
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in your values. Key variables:
+Mở file `.env` và điền các giá trị thực. Các biến quan trọng:
 
 ```env
 MONGO_ROOT_USERNAME=admin
-MONGO_ROOT_PASSWORD=your_strong_password
+MONGO_ROOT_PASSWORD=mat_khau_manh_cua_ban
 
-# Must match the credentials above
-MONGODB_URL=mongodb://admin:your_strong_password@mongo:27017/?authSource=admin
+# Phải khớp với thông tin đăng nhập MongoDB ở trên
+MONGODB_URL=mongodb://admin:mat_khau_manh_cua_ban@mongo:27017/?authSource=admin
 
 MONGODB_DB_NAME=taskmanager
-SECRET_KEY=your_random_secret_key_here
+SECRET_KEY=khoa_bi_mat_ngau_nhien
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 ALLOWED_ORIGINS=https://localhost
 DOMAIN=localhost
 ```
 
-To generate a strong `SECRET_KEY`:
+Tạo `SECRET_KEY` ngẫu nhiên bằng lệnh:
 ```bash
 openssl rand -hex 32
 ```
 
-### Step 3 — Generate SSL certificate (run once)
+### Bước 3 — Tạo chứng chỉ SSL (chỉ chạy một lần)
 
 **Windows:**
 ```bat
@@ -112,15 +112,15 @@ generate-ssl.bat
 bash generate-ssl.sh
 ```
 
-This creates `nginx/ssl/cert.pem` and `nginx/ssl/key.pem`.
+Lệnh này tạo ra hai file `nginx/ssl/cert.pem` và `nginx/ssl/key.pem`.
 
-### Step 4 — Build and start all services
+### Bước 4 — Build và khởi động tất cả service
 
 ```bash
 docker compose up --build
 ```
 
-Expected output when all services are ready:
+Khi tất cả service sẵn sàng, terminal sẽ hiển thị:
 ```
 mongo    | MongoDB starting...
 fastapi  | Connected to MongoDB: taskmanager
@@ -128,31 +128,31 @@ fastapi  | INFO: Uvicorn running on http://0.0.0.0:8000
 nginx    | ready for start up
 ```
 
-### Step 5 — Open the application
+### Bước 5 — Mở ứng dụng trên trình duyệt
 
-| URL | Description |
+| Địa chỉ | Mô tả |
 |---|---|
-| `https://localhost` | Main application (TaskFlow UI) |
-| `https://localhost/api/docs` | FastAPI Swagger UI (API documentation) |
-| `https://localhost/api/health` | Health check endpoint |
+| `https://localhost` | Giao diện chính của ứng dụng TaskFlow |
+| `https://localhost/api/docs` | Swagger UI — tài liệu và test API |
+| `https://localhost/api/health` | Kiểm tra trạng thái hệ thống |
 
-> **Note:** Your browser will show a security warning for the self-signed certificate.
-> Click **Advanced → Proceed to localhost** to continue.
-> This is expected behavior for local development certificates.
+> **Lưu ý:** Trình duyệt sẽ hiện cảnh báo bảo mật do dùng chứng chỉ SSL tự ký.
+> Bấm **Nâng cao → Tiếp tục đến localhost** để vào ứng dụng.
+> Đây là hành vi bình thường với môi trường phát triển cục bộ.
 
 ---
 
-## Running Locally (without Docker)
+## Hướng dẫn chạy cục bộ (không dùng Docker)
 
-Useful for development and debugging.
+Phù hợp cho việc phát triển và debug.
 
-### Step 1 — Start a MongoDB instance
+### Bước 1 — Khởi động MongoDB
 
 ```bash
 docker run -d -p 27017:27017 --name mongo-local mongo:7.0
 ```
 
-### Step 2 — Create and activate virtual environment
+### Bước 2 — Tạo và kích hoạt môi trường ảo Python
 
 ```bash
 cd backend
@@ -165,15 +165,14 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### Step 3 — Install dependencies
+### Bước 3 — Cài đặt thư viện
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 4 — Configure environment
+### Bước 4 — Tạo file `.env` trong thư mục `backend/`
 
-Create `backend/.env`:
 ```env
 MONGODB_URL=mongodb://localhost:27017/
 MONGODB_DB_NAME=taskmanager
@@ -182,118 +181,126 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 ALLOWED_ORIGINS=http://localhost:8000
 ```
 
-### Step 5 — Run the server
+### Bước 5 — Khởi động server
 
 ```bash
 python -m uvicorn main:app --reload
 ```
 
-Open `http://localhost:8000` in your browser.
+Mở trình duyệt tại `http://localhost:8000`.
 
-> **Note:** When running locally, `API_BASE` in `frontend/app.js` must be set to `''` (empty string).
-> When running via Docker + Nginx, it must be `'/api'`.
-
----
-
-## API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/auth/register` | Create a new account |
-| POST | `/auth/login` | Login, returns JWT token |
-| GET | `/auth/me` | Get current user profile |
-
-### Tasks
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/tasks/` | List all tasks (supports `?status=`, `?priority=`, `?category_id=`) |
-| POST | `/tasks/` | Create a new task |
-| GET | `/tasks/{id}` | Get a single task |
-| PATCH | `/tasks/{id}` | Partially update a task |
-| DELETE | `/tasks/{id}` | Delete a task |
-
-### Categories
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/categories/` | List all categories |
-| POST | `/categories/` | Create a new category |
-| PATCH | `/categories/{id}` | Update a category |
-| DELETE | `/categories/{id}` | Delete a category (tasks are unlinked, not deleted) |
-
-All endpoints except `/auth/register` and `/auth/login` require:
-```
-Authorization: Bearer <your_jwt_token>
-```
+> **Lưu ý:** Khi chạy cục bộ (không qua Docker + Nginx), biến `API_BASE`
+> trong `frontend/app.js` phải được đặt thành `''` (chuỗi rỗng).
+> Khi chạy qua Docker + Nginx, đặt thành `'/api'`.
 
 ---
 
-## CI/CD Pipeline
+## Danh sách API
 
-The GitHub Actions pipeline (`.github/workflows/deploy.yml`) runs automatically on every push to `main`:
+### Xác thực
+
+| Phương thức | Đường dẫn | Mô tả |
+|---|---|---|
+| POST | `/auth/register` | Tạo tài khoản mới |
+| POST | `/auth/login` | Đăng nhập, trả về JWT token |
+| GET | `/auth/me` | Lấy thông tin người dùng hiện tại |
+
+### Công việc (Tasks)
+
+| Phương thức | Đường dẫn | Mô tả |
+|---|---|---|
+| GET | `/tasks/` | Lấy danh sách công việc (hỗ trợ lọc theo `?status=`, `?priority=`, `?category_id=`) |
+| POST | `/tasks/` | Tạo công việc mới |
+| GET | `/tasks/{id}` | Lấy chi tiết một công việc |
+| PATCH | `/tasks/{id}` | Cập nhật một phần công việc |
+| DELETE | `/tasks/{id}` | Xóa công việc |
+
+### Danh mục (Categories)
+
+| Phương thức | Đường dẫn | Mô tả |
+|---|---|---|
+| GET | `/categories/` | Lấy danh sách danh mục |
+| POST | `/categories/` | Tạo danh mục mới |
+| PATCH | `/categories/{id}` | Cập nhật danh mục |
+| DELETE | `/categories/{id}` | Xóa danh mục (công việc thuộc danh mục sẽ không bị xóa) |
+
+Tất cả các endpoint ngoại trừ `/auth/register` và `/auth/login` đều yêu cầu header:
+```
+Authorization: Bearer <jwt_token>
+```
+
+---
+
+## Pipeline CI/CD
+
+Pipeline GitHub Actions (`.github/workflows/deploy.yml`) tự động chạy mỗi khi có push lên nhánh `main`:
 
 ```
-Push to main
-    │
-    ▼
-Job 1: Test ──── fail ──→ Pipeline stops
-    │ pass
-    ▼
-Job 2: Build Docker image ──── fail ──→ Pipeline stops
-    │ pass
-    ▼
-Job 3: Deploy to VPS (requires secrets)
+Push lên nhánh main
+        │
+        ▼
+Job 1: Chạy tests ── thất bại ──→ Pipeline dừng lại
+        │ thành công
+        ▼
+Job 2: Build Docker image ── thất bại ──→ Pipeline dừng lại
+        │ thành công
+        ▼
+Job 3: Deploy lên VPS (cần cấu hình secrets)
 ```
 
-To enable the deploy job, add these secrets to your GitHub repository
+Để kích hoạt job deploy, thêm các secrets sau vào repository GitHub
 (**Settings → Secrets and variables → Actions**):
 
-| Secret | Value |
+| Secret | Giá trị |
 |---|---|
-| `VPS_HOST` | IP address or domain of your server |
-| `VPS_USER` | SSH username (e.g. `ubuntu`) |
-| `VPS_SSH_KEY` | Contents of your private SSH key (`~/.ssh/id_rsa`) |
+| `VPS_HOST` | Địa chỉ IP hoặc domain của server |
+| `VPS_USER` | Tên người dùng SSH (ví dụ: `ubuntu`) |
+| `VPS_SSH_KEY` | Nội dung private key SSH (`~/.ssh/id_rsa`) |
 
 ---
 
-## Stopping the Application
+## Kiến trúc triển khai
+
+```
+Internet
+    │
+    ▼ cổng 443 (HTTPS)
+┌─────────────────────────────────────────────┐
+│  Nginx (reverse proxy)                      │
+│  - Kết thúc SSL (chứng chỉ Let's Encrypt)  │
+│  - Phục vụ file tĩnh frontend              │
+│  - Chuyển tiếp /api/* → FastAPI:8000       │
+└──────────────────┬──────────────────────────┘
+                   │ Docker internal network
+         ┌─────────┴──────────┐
+         ▼                    ▼
+    ┌─────────┐         ┌──────────┐
+    │ FastAPI │────────▶│ MongoDB  │
+    │  :8000  │         │  :27017  │
+    └─────────┘         └──────────┘
+```
+
+---
+
+## Dừng ứng dụng
 
 ```bash
-# Stop all containers (preserves data)
+# Dừng tất cả container (giữ lại dữ liệu)
 docker compose down
 
-# Stop and remove all data (full reset)
+# Dừng và xóa toàn bộ dữ liệu (reset hoàn toàn)
 docker compose down -v
 ```
 
 ---
 
-## Deployment Architecture
+## Thành viên nhóm
 
-```
-Internet
-    │
-    ▼ port 443 (HTTPS)
-┌─────────────────────────────────────────┐
-│  Nginx (reverse proxy)                  │
-│  - SSL termination (Let's Encrypt)      │
-│  - Serves frontend static files         │
-│  - Proxies /api/* → FastAPI:8000        │
-└──────────────┬──────────────────────────┘
-               │ Docker internal network
-       ┌───────┴────────┐
-       ▼                ▼
-  ┌─────────┐     ┌──────────┐
-  │ FastAPI │────▶│ MongoDB  │
-  │ :8000   │     │ :27017   │
-  └─────────┘     └──────────┘
-```
+| Họ và tên | MSSV | Vai trò |
+|---|---|---|
+| [Thành viên 1] | [MSSV] | [Vai trò] |
+| [Thành viên 2] | [MSSV] | [Vai trò] |
 
----
-
-**Course:** Web Programming and Applications (503073)
-**Institution:** Ton Duc Thang University — Faculty of Information Technology
-**Semester:** 2 — Academic Year 2025–2026
+**Môn học:** Lập trình Web và Ứng dụng (503073)
+**Trường:** Đại học Tôn Đức Thắng — Khoa Công nghệ Thông tin
+**Học kỳ:** 2 — Năm học 2025–2026
