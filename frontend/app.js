@@ -5,7 +5,7 @@
 // So we use a relative base URL — works both locally and in Docker.
 // ============================================================
 
-const API_BASE = 'https://giuaky-lt-web-production.up.railway.app/';   // Nginx proxies /api/* → FastAPI
+const API_BASE = 'https://giuaky-lt-web-production.up.railway.app';
 
 
 // ============================================================
